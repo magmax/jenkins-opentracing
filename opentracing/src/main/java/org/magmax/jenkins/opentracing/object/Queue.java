@@ -6,13 +6,13 @@ import jenkins.YesNoMaybe;
 
 import hudson.Extension;
 import hudson.model.queue.QueueListener;
-import io.jaegertracing.internal.JaegerSpan;
+import io.opentracing.Scope;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class Queue extends QueueListener {
-    private JaegerSpan waitingSpan;
-    private JaegerSpan blockedSpan;
-    private JaegerSpan buildableSpan;
+    private Scope waitingSpan;
+    private Scope blockedSpan;
+    private Scope buildableSpan;
 
     @Override
     public void onEnterWaiting(hudson.model.Queue.WaitingItem wi) {
@@ -25,7 +25,7 @@ public class Queue extends QueueListener {
     public void onLeaveWaiting(hudson.model.Queue.WaitingItem wi) {
         super.onLeaveWaiting(wi);
         if (waitingSpan != null) {
-            waitingSpan.finish();
+            waitingSpan.close();
         }
         System.out.println("** QUEUE ** onLeaveWaiting" + wi.getId());
     }
@@ -40,7 +40,7 @@ public class Queue extends QueueListener {
     @Override
     public void onLeaveBlocked(hudson.model.Queue.BlockedItem bi) {
         super.onLeaveBlocked(bi);
-        blockedSpan.finish();
+        blockedSpan.close();
         System.out.println("** QUEUE ** onLeaveBlocked" + bi.getId());
 
     }
@@ -58,7 +58,7 @@ public class Queue extends QueueListener {
     public void onLeaveBuildable(hudson.model.Queue.BuildableItem bi) {
         super.onLeaveBuildable(bi);
         if (buildableSpan != null)
-            buildableSpan.finish();  
+            buildableSpan.close();  
         System.out.println("** QUEUE ** onLeaveBuildable" + bi.getId());
 
     }

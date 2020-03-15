@@ -13,12 +13,12 @@ import hudson.model.BuildListener;
 import hudson.model.Environment;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-import io.jaegertracing.internal.JaegerSpan;
+import io.opentracing.Scope;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class Run extends RunListener<hudson.model.Run<?, ?>> {
 
-    private JaegerSpan span;
+    private Scope span;
 
     public Run() {
         // Necessary for jenkins
@@ -46,7 +46,8 @@ public class Run extends RunListener<hudson.model.Run<?, ?>> {
         try {
             super.onFinalized(run);
         } finally {
-            span.finish();
+            if (span != null)
+                span.close();
         }
     }
 
@@ -56,11 +57,11 @@ public class Run extends RunListener<hudson.model.Run<?, ?>> {
         System.out.println("** RUN ** setUpEnvironment " + build.getQueueId());
         System.out.println("***** Thread: " + Thread.currentThread().getId());
         IdMap idmap = new IdMap();
-        JaegerSpan envSpan = idmap.getSpan(build.getQueueId(), "setUpEnvironment");
+        Scope envSpan = idmap.getSpan(build.getQueueId(), "setUpEnvironment");
         try {
             return super.setUpEnvironment(build, launcher, listener);
         } finally {
-            envSpan.finish();
+            envSpan.close();
         }
     }
 }

@@ -5,7 +5,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.BuildStepListener;
 import hudson.tasks.BuildStep;
-import io.jaegertracing.internal.JaegerSpan;
+import io.opentracing.Scope;
 import jenkins.YesNoMaybe;
 import org.magmax.jenkins.opentracing.IdMap;
 
@@ -13,7 +13,7 @@ import org.magmax.jenkins.opentracing.IdMap;
 public class BuilderStep extends BuildStepListener {
 
 
-    private JaegerSpan span;
+    private Scope span;
 
     @java.lang.Override
     public void started(AbstractBuild abstractBuild, BuildStep buildStep, BuildListener buildListener) {
@@ -26,7 +26,7 @@ public class BuilderStep extends BuildStepListener {
     @java.lang.Override
     public void finished(AbstractBuild abstractBuild, BuildStep buildStep, BuildListener buildListener, boolean b) {
         if (span != null) {
-            span.finish();
+            span.close();
         }
         System.out.println("***** Thread: " + Thread.currentThread().getId());
         System.out.println("** STEP **: " + abstractBuild.getProject().getBuildStatusUrl());
