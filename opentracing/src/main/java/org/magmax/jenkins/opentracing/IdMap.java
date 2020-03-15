@@ -2,6 +2,7 @@ package org.magmax.jenkins.opentracing;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Queue.BlockedItem;
+import hudson.model.Queue.BuildableItem;
 import hudson.model.Queue.WaitingItem;
 import io.jaegertracing.Configuration;
 import io.jaegertracing.internal.JaegerSpan;
@@ -36,40 +37,6 @@ public class IdMap {
 
     JaegerTracer tracer = config.getTracer();
 
-    private Object get(AbstractBuild build) {
-        // get for current build
-        String id = build.getExternalizableId();
-        LRUCache cache = LRUCache.getInstance();
-        Object result = cache.get(id);
-        if (result != null) {
-            return result;
-        }
-        // get for the parent build
-        id = build.getRootBuild().getExternalizableId();
-        result = cache.get(id);
-        if (result != null) {
-            return result;
-        }
-        // get for any related build
-        /*
-        AbstractBuild parent = build.getPreviousBuild();
-        while (parent != null) {
-            id = parent.getExternalizableId();
-            result = cache.get(id);
-            if (result != null) {
-                return result;
-            }
-            parent = parent.getPreviousBuild();
-        }
-        */
-        // a new identity is required
-        return null;
-    }
-
-    private void set(AbstractBuild build, Object value) {
-        LRUCache.getInstance().put(build.getExternalizableId(), value);
-    }
-
     private JaegerSpan getSpan(HashMap<String, String> carrier, String name) {
         JaegerTracer.SpanBuilder spanBuilder = tracer.buildSpan(name);
 
@@ -86,35 +53,74 @@ public class IdMap {
         return span;
     }
 
-    public JaegerSpan getSpan(AbstractBuild abstractBuild, String name) {
-        HashMap<String, String> carrier = (HashMap<String, String>) get(abstractBuild);
+    public JaegerSpan getSpan(AbstractBuild build, String name) {
+        String id = "AbstractBuild:" + build.getExternalizableId();
+        System.out.println(id);
+        LRUCache cache = LRUCache.getInstance();
+        HashMap<String, String> carrier = (HashMap<String, String>) cache.get(id);
 
         JaegerSpan span = getSpan(carrier, name);
         if (carrier != null) {
-            set(abstractBuild, carrier);
+            LRUCache.getInstance().put(id, carrier);
         }
 
         return span;
     }    
 
 	public JaegerSpan getSpan(WaitingItem wi, String name) {
-        HashMap<String, String> carrier = (HashMap<String, String>) get(wi);
+        String id = "WaitingItem:" + wi.getId();
+        System.out.println(id);
+
+        LRUCache cache = LRUCache.getInstance();
+        HashMap<String, String> carrier = (HashMap<String, String>) cache.get(id);
 
         JaegerSpan span = getSpan(carrier, name);
         if (carrier != null) {
-            set(wi, carrier);
+            LRUCache.getInstance().put(id, carrier);
         }
 
         return span;
 	}
 
 	public JaegerSpan getSpan(BlockedItem bi, String name) {
-        HashMap<String, String> carrier = (HashMap<String, String>) get(bi);
+        String id = "BlockedItem:" + bi.getId();
+        System.out.println(id);
+
+        LRUCache cache = LRUCache.getInstance();
+        HashMap<String, String> carrier = (HashMap<String, String>) cache.get(id);
+
         JaegerSpan span = getSpan(carrier, name);
         if (carrier != null) {
-            set(bi, carrier);
+            LRUCache.getInstance().put(id, carrier);
         }
+
         return span;
     }
 
+	public JaegerSpan getSpan(String id, String name) {
+        System.out.println(id);
+
+        LRUCache cache = LRUCache.getInstance();
+        HashMap<String, String> carrier = (HashMap<String, String>) cache.get(id);
+
+        JaegerSpan span = getSpan(carrier, name);
+        if (carrier != null) {
+            LRUCache.getInstance().put(id, carrier);
+        }
+
+        return span;
+	}
+
+	public JaegerSpan getSpan(long id, String name) {
+        String myId = "" + id;
+        LRUCache cache = LRUCache.getInstance();
+        HashMap<String, String> carrier = (HashMap<String, String>) cache.get(myId);
+
+        JaegerSpan span = getSpan(carrier, name);
+        if (carrier != null) {
+            LRUCache.getInstance().put(myId, carrier);
+        }
+
+        return span;
+	}
 }

@@ -18,7 +18,9 @@ public class BuilderStep extends BuildStepListener {
     @java.lang.Override
     public void started(AbstractBuild abstractBuild, BuildStep buildStep, BuildListener buildListener) {
         IdMap idmap = new IdMap();
-        span = idmap.getSpan(abstractBuild, "Step");
+        span = idmap.getSpan(abstractBuild.getQueueId(), "Step");
+        System.out.println("***** Thread: " + Thread.currentThread().getId());
+        System.out.println("** STEP **: " + abstractBuild.getProject().getBuildStatusUrl());
     }
 
     @java.lang.Override
@@ -26,7 +28,7 @@ public class BuilderStep extends BuildStepListener {
         if (span != null) {
             span.finish();
         }
-        //scope = tracer.extract()
-        //scope.close();
+        System.out.println("***** Thread: " + Thread.currentThread().getId());
+        System.out.println("** STEP **: " + abstractBuild.getProject().getBuildStatusUrl());
     }
 }
