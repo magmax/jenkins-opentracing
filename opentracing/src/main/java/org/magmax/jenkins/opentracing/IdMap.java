@@ -1,78 +1,40 @@
 package org.magmax.jenkins.opentracing;
 
-import hudson.model.AbstractBuild;
-import hudson.model.Queue.BlockedItem;
-import hudson.model.Queue.BuildableItem;
-import hudson.model.Queue.WaitingItem;
-import io.jaegertracing.Configuration;
-import io.jaegertracing.internal.JaegerSpan;
-import io.jaegertracing.internal.JaegerSpanContext;
-import io.jaegertracing.internal.JaegerTracer;
-import io.jaegertracing.internal.samplers.ConstSampler;
-import io.opentracing.Scope;
-import io.opentracing.propagation.Format;
-import io.opentracing.propagation.TextMapAdapter;
-
-import java.util.HashMap;
+import io.opentracing.Span;
 
 public class IdMap {
+    private String myId;
 
-    private static int MAX_SIZE = 1000;
+    public IdMap(long id) {
+        myId = "" + id;
+    }
 
-    Configuration.SamplerConfiguration samplerConfig = Configuration.SamplerConfiguration.fromEnv()
-            .withType(ConstSampler.TYPE).withParam(1);
+    public Span getSpan(String name) {
+        LRUCache cache = LRUCache.getInstance();
+        ILRUItem item = cache.get(myId);
 
-    Configuration.SenderConfiguration senderConfig = Configuration.SenderConfiguration.fromEnv()
-            .withAgentHost("localhost").withAgentPort(5775);
-
-    Configuration.ReporterConfiguration reporterConfig = Configuration.ReporterConfiguration.fromEnv()
-            .withSender(senderConfig).withLogSpans(true);
-
-    Configuration config = new Configuration("Jenkins").withSampler(samplerConfig).withReporter(reporterConfig);
-
-    JaegerTracer tracer = config.getTracer();
-
-    private JaegerSpan getSpan(HashMap<String, String> carrier, String name) {
-        JaegerTracer.SpanBuilder spanBuilder = tracer.buildSpan(name);
-
-        if (carrier != null) {
-            JaegerSpanContext context = tracer.extract(Format.Builtin.TEXT_MAP, new TextMapAdapter(carrier));
-            spanBuilder.asChildOf(context);
+        if (item == null) {
+            item = new JenkinsTracer();
+            LRUCache.getInstance().put(myId, item);
         }
+        Span span = item.createSpan(name);
 
-        JaegerSpan span = spanBuilder.start();
-
-        if (carrier != null) {
-            tracer.inject(span.context(), Format.Builtin.TEXT_MAP, new TextMapAdapter(carrier));
-        }
         return span;
     }
 
-    public Scope getSpan(long id, String name) {
-        String myId = "" + Thread.currentThread().getId();
+    public void closeActiveSpan() {
         LRUCache cache = LRUCache.getInstance();
-        JaegerTracer mytracer = (JaegerTracer) cache.get(myId);
-
-        if (mytracer == null) {
-            mytracer = config.getTracer();
-            LRUCache.getInstance().put(myId, tracer);
+        ILRUItem item = cache.get(myId);
+        if (item != null) {
+            item.closeActiveSpan();
         }
-        Scope scope = mytracer.buildSpan(name).startActive(true);
+    }
 
-        mytracer.buildSpan("FOO").startActive(true).close();
-        return scope;
-	}
+    public void finalize() {
+        ILRUItem item = LRUCache.getInstance().get("" + myId);
 
-	public JaegerSpan getSpanOld(long id, String name) {
-        String myId = "" + id;
-        LRUCache cache = LRUCache.getInstance();
-        HashMap<String, String> carrier = (HashMap<String, String>) cache.get(myId);
-
-        JaegerSpan span = getSpan(carrier, name);
-        if (carrier != null) {
-            LRUCache.getInstance().put(myId, carrier);
+        if (item != null) {
+            item.finish();
         }
-
-        return span;
-	}
+    }
 }

@@ -6,14 +6,14 @@ public class LRUCache {
     private static final int MAX_SIZE = 1000;
     private int max_size = MAX_SIZE;
     private static LRUCache _instance = null;
-    private HashMap<String, LRUCacheItem> map = new HashMap<>();
-    private LRUCacheItem first;
-    private LRUCacheItem last;
+    private HashMap<String, LRUItemContainer> map = new HashMap<>();
+    private LRUItemContainer first;
+    private LRUItemContainer last;
 
     private LRUCache() {
     }
 
-    public static LRUCache getInstance() { 
+    public static LRUCache getInstance() {
         if (_instance == null) {
             _instance = new LRUCache();
         }
@@ -28,32 +28,32 @@ public class LRUCache {
         max_size = MAX_SIZE;
     }
 
-    public Object get(String id) {
+    public ILRUItem get(String id) {
         if (! map.containsKey(id)) {
             return null;
         }
-        LRUCacheItem value = map.get(id);
+        LRUItemContainer value = map.get(id);
 
         if (first == value) {
-            return value;
+            return value.data;
         }
-        
+
         removeFromList(value);
         insertInList(value);
         return value.data;
     }
 
-    public void put(String id, Object data) {
+    public void put(String id, ILRUItem data) {
         if (map.containsKey(id)) {
             removeFromList(map.get(id));
         }
-        LRUCacheItem item = new LRUCacheItem(id, data);
+        LRUItemContainer item = new LRUItemContainer(id, data);
         map.put(id, item);
         insertInList(item);
         ensureSize();
     }
 
-    private void insertInList(LRUCacheItem value) {   
+    private void insertInList(LRUItemContainer value) {
         value.previous = null;
         value.next = first;
         if (first != null) {
@@ -66,14 +66,15 @@ public class LRUCache {
 
     private void ensureSize() {
         while (map.size() > max_size) {
+            last.data.finish();
             map.remove(last.key);
             last = last.previous;
         }
     }
 
-    private void removeFromList(LRUCacheItem item) {
-        LRUCacheItem previous = item.previous;
-        LRUCacheItem next = item.next;
+    private void removeFromList(LRUItemContainer item) {
+        LRUItemContainer previous = item.previous;
+        LRUItemContainer next = item.next;
 
         if (previous != null ) {
             previous.next = next;
@@ -98,14 +99,14 @@ public class LRUCache {
 	}
 }
 
-class LRUCacheItem {
-    LRUCacheItem previous;
-    LRUCacheItem next;
+class LRUItemContainer {
+    LRUItemContainer previous;
+    LRUItemContainer next;
 
     String key;
-    Object data;
+    ILRUItem data;
 
-    public LRUCacheItem(String key, Object data) {
+    public LRUItemContainer(String key, ILRUItem data) {
         this.key = key;
         this.data = data;
     }

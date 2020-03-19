@@ -5,30 +5,29 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.BuildStepListener;
 import hudson.tasks.BuildStep;
-import io.opentracing.Scope;
+import io.opentracing.Span;
 import jenkins.YesNoMaybe;
 import org.magmax.jenkins.opentracing.IdMap;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class BuilderStep extends BuildStepListener {
 
-
-    private Scope span;
+    private Span span;
 
     @java.lang.Override
-    public void started(AbstractBuild abstractBuild, BuildStep buildStep, BuildListener buildListener) {
-        IdMap idmap = new IdMap();
-        span = idmap.getSpan(abstractBuild.getQueueId(), "Step");
-        System.out.println("***** Thread: " + Thread.currentThread().getId());
-        System.out.println("** STEP **: " + abstractBuild.getProject().getBuildStatusUrl());
+    public void started(AbstractBuild build, BuildStep step, BuildListener buildListener) {
+        IdMap idmap = new IdMap(build.getQueueId());
+        span = idmap.getSpan("Step");
+        span.setTag("type", step.getClass().getName());
     }
 
     @java.lang.Override
-    public void finished(AbstractBuild abstractBuild, BuildStep buildStep, BuildListener buildListener, boolean b) {
-        if (span != null) {
-            span.close();
+    public void finished(AbstractBuild build, BuildStep step, BuildListener buildListener, boolean canContinue) {
+        IdMap idmap = new IdMap(build.getQueueId());
+        span.setTag("canContinue", canContinue);
+        if (!canContinue) {
+            span.setTag("error", "cannot continue");
         }
-        System.out.println("***** Thread: " + Thread.currentThread().getId());
-        System.out.println("** STEP **: " + abstractBuild.getProject().getBuildStatusUrl());
+        idmap.closeActiveSpan();
     }
 }
