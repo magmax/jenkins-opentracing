@@ -48,7 +48,7 @@ public class Run extends RunListener<hudson.model.Run<?, ?>> {
     @Override
     public Environment setUpEnvironment(AbstractBuild build, Launcher launcher, BuildListener listener)
             throws IOException, InterruptedException {
-        IdMap idmap = new IdMap(build.getQueueId()
+        IdMap idmap = new IdMap(build.getQueueId());
         Span envSpan = idmap.getSpan("setUpEnvironment");
         try {
             return super.setUpEnvironment(build, launcher, listener);
