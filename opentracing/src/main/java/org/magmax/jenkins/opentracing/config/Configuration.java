@@ -19,16 +19,19 @@ public class Configuration extends AbstractConfiguration {
         private List<AbstractTracerConfig> tracers;
 
         public List<AbstractTracerConfig> getTracers() {
+            System.out.println(">>>>>>  Configuration > DescriptorImpl getTracers");
             return Collections.unmodifiableList(tracers == null ? Collections.emptyList() : tracers);
         }
 
         public void setTracers(List<AbstractTracerConfig> tracers) {
+            System.out.println(">>>>>>  Configuration > DescriptorImpl setTracers");
+
             this.tracers = tracers;
         }
     }
 
     public static final class DescribableImpl extends AbstractDescribableImpl<DescribableImpl> {
-
+        /*
         private final List<AbstractTracerConfig> tracers;
 
         @DataBoundConstructor
@@ -38,13 +41,14 @@ public class Configuration extends AbstractConfiguration {
                     : new ArrayList<AbstractTracerConfig>(tracers);
         }
 
-        public List<AbstractTracerConfig> geTracers() {
+        public List<AbstractTracerConfig> getTracers() {
             return Collections.unmodifiableList(tracers);
         }
 
         @Extension
         public static class DescriptorImpl extends Descriptor<DescribableImpl> {
         }
+        */
     }
 
     @Override
