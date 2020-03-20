@@ -8,53 +8,71 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
-import hudson.model.AbstractProject;
-import hudson.model.FreeStyleProject;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
 @Extension
-public class Configuration extends Builder {
+public class Configuration extends AbstractConfiguration {
 
-    private DescribableImpl config;
+    @Extension
+    public static final class DescriptorImpl extends Descriptor<AbstractConfiguration> {
+        private List<AbstractTracerConfig> tracers;
 
-    public DescribableImpl getConfig() {
-        return config;
+        public List<AbstractTracerConfig> getTracers() {
+            return Collections.unmodifiableList(tracers == null ? Collections.emptyList() : tracers);
+        }
+
+        public void setTracers(List<AbstractTracerConfig> tracers) {
+            this.tracers = tracers;
+        }
     }
 
-    public void setConfig(DescribableImpl config) {
-        this.config = config;
+    public static final class DescribableImpl extends AbstractDescribableImpl<DescribableImpl> {
+
+        private final List<AbstractTracerConfig> tracers;
+
+        @DataBoundConstructor
+        public DescribableImpl(List<AbstractTracerConfig> tracers) {
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Bounding: " + tracers);
+            this.tracers = tracers == null ? Collections.<AbstractTracerConfig>emptyList()
+                    : new ArrayList<AbstractTracerConfig>(tracers);
+        }
+
+        public List<AbstractTracerConfig> geTracers() {
+            return Collections.unmodifiableList(tracers);
+        }
+
+        @Extension
+        public static class DescriptorImpl extends Descriptor<DescribableImpl> {
+        }
     }
 
     @Override
-    public Descriptor getDescriptor() {
-        return (Descriptor) super.getDescriptor();
+    public String getIconFileName() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    @Extension
-    public static class Descriptor extends BuildStepDescriptor<Builder> {
-
-        @Override
-        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return FreeStyleProject.class.isAssignableFrom(jobType);
-        }
+    @Override
+    public String getDisplayName() {
+        return "OpenTracing";
     }
 
-    @Extension
-    public static final class DescriptorImpl extends hudson.model.Descriptor<DescribableImpl> {
+    @Override
+    public String getUrlName() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    public final class DescribableImpl extends AbstractDescribableImpl<DescribableImpl> {
+    /*
+     * @Override public Descriptor getDescriptor() { return (Descriptor)
+     * super.getDescriptor(); }
+     */
 
-        private final List<AbstractTracerConfig> trackers;
-
-        @DataBoundConstructor
-        public DescribableImpl(List<AbstractTracerConfig> trackers) {
-            this.trackers = trackers != null ? new ArrayList<AbstractTracerConfig>(trackers) : Collections.<AbstractTracerConfig>emptyList();
-        }
-
-        public List<AbstractTracerConfig> geTrackers() {
-            return Collections.unmodifiableList(trackers);
-        }
+    @Override
+    public Descriptor<AbstractConfiguration> getDescriptor() {
+        // return (Descriptor<Configuration>) super.getDescriptor();
+        return (Descriptor<AbstractConfiguration>) Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
+
 }
