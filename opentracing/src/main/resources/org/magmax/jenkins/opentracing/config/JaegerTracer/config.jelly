@@ -5,6 +5,7 @@
     <f:entry field="host" title="Hostname">
         <f:textbox/>
     </f:entry>
+    </f:entry>
        <f:entry field="port" title="Port">
         <f:textbox/>
     </f:entry>

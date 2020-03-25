@@ -4,10 +4,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 
-public final class JaegerTracerConfig extends AbstractTracerConfig {
+public final class JaegerTracer extends Tracer {
 
     @Extension
-    public static class DescriptorImpl extends hudson.model.Descriptor<AbstractTracerConfig> {
+    public static class JaegerTracerDescriptorImpl extends hudson.model.Descriptor<Tracer> {
         @Override
         public String getDisplayName() {
             return "Jaeger Tracer";
@@ -17,10 +17,19 @@ public final class JaegerTracerConfig extends AbstractTracerConfig {
     private String host = "localhost";
     private String port = "5775";
 
+/*
+<!--
+    <f:entry title="${%Tracers}">
+      <f:repeatableHeteroProperty field="tracers" hasHeader="true"/>
+    </f:entry>
+-->
+*/
+
     @DataBoundConstructor
-    public JaegerTracerConfig(String host, String port) {
+    public JaegerTracer(String host, String port) {
         System.out.println(">>>>>>  JaegerTracerConfig constructor");
         this.host = host;
+        this.port = port;
     }
 
     public String getHost() {

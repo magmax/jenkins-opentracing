@@ -1,7 +1,5 @@
 package org.magmax.jenkins.opentracing.object;
 
-import jenkins.YesNoMaybe;
-
 import java.io.IOException;
 
 import org.magmax.jenkins.opentracing.IdMap;
@@ -14,6 +12,7 @@ import hudson.model.Environment;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import io.opentracing.Span;
+import jenkins.YesNoMaybe;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class Run extends RunListener<hudson.model.Run<?, ?>> {
