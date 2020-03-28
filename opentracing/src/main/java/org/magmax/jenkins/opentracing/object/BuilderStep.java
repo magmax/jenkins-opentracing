@@ -12,6 +12,18 @@ import org.magmax.jenkins.opentracing.IdMap;
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class BuilderStep extends BuildStepListener {
 
+    @Override
+    public void started(AbstractBuild build, BuildStep bs, BuildListener listener) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void finished(AbstractBuild build, BuildStep bs, BuildListener listener, boolean canContinue) {
+        // TODO Auto-generated method stub
+
+    }
+/*
     private Span span;
 
     @java.lang.Override
@@ -30,4 +42,5 @@ public class BuilderStep extends BuildStepListener {
         }
         idmap.closeActiveSpan();
     }
+    */
 }

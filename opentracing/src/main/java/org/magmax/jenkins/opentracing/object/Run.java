@@ -17,7 +17,7 @@ import io.opentracing.Span;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class Run extends RunListener<hudson.model.Run<?, ?>> {
-
+/*
     private Span span;
 
     public Run() {
@@ -56,4 +56,5 @@ public class Run extends RunListener<hudson.model.Run<?, ?>> {
             idmap.closeActiveSpan();
         }
     }
+    */
 }

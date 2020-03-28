@@ -3,6 +3,8 @@ package org.magmax.jenkins.opentracing.config;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
+import io.jaegertracing.internal.JaegerTracer;
+import io.jaegertracing.internal.samplers.ConstSampler;
 
 public final class JaegerTracerConfig extends AbstractTracerConfig {
 
@@ -14,34 +16,39 @@ public final class JaegerTracerConfig extends AbstractTracerConfig {
         }
     }
 
+    private String serviceName = "Jenkins";
     private String host = "localhost";
-    private String port = "5775";
+    private Integer port = 5775;
 
     @DataBoundConstructor
-    public JaegerTracerConfig(String host, String port) {
-        System.out.println(">>>>>>  JaegerTracerConfig constructor");
+    public JaegerTracerConfig(String serviceName, String host, Integer port) {
+        this.serviceName = serviceName;
         this.host = host;
+        this.port = port;
+    }
+
+    public String serviceName() {
+        return serviceName;
     }
 
     public String getHost() {
-        System.out.println(">>>>>>  JaegerTracerConfig getHost: " + host);
-
         return host;
     }
 
-    public String getPort() {
-        System.out.println(">>>>>>  JaegerTracerConfig getPort: " + port);
-
+    public Integer getPort() {
         return port;
     }
 
+    public JaegerTracer getTracer() {
+        io.jaegertracing.Configuration.SamplerConfiguration samplerConfig = io.jaegertracing.Configuration.SamplerConfiguration
+                .fromEnv().withType(ConstSampler.TYPE).withParam(1);
+        io.jaegertracing.Configuration.SenderConfiguration senderConfig = io.jaegertracing.Configuration.SenderConfiguration
+                .fromEnv().withAgentHost(host).withAgentPort(port);
+        io.jaegertracing.Configuration.ReporterConfiguration reporterConfig = io.jaegertracing.Configuration.ReporterConfiguration
+                .fromEnv().withSender(senderConfig).withLogSpans(true);
+        io.jaegertracing.Configuration config = new io.jaegertracing.Configuration(serviceName)
+                .withSampler(samplerConfig).withReporter(reporterConfig);
 
-
-/*
-    public void sethost(String host) {
-        System.out.println(">>>>>>  JaegerTracerConfig setHost");
-
-        this.host = host;
+        return config.getTracer();
     }
-*/
 }

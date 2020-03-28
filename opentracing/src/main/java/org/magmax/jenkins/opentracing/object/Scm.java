@@ -16,7 +16,7 @@ import jenkins.YesNoMaybe;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class Scm extends SCMListener {
-
+/*
     @Override
     public void onChangeLogParsed(AbstractBuild<?, ?> build, BuildListener listener, ChangeLogSet<?> changelog)
             throws Exception {
@@ -49,5 +49,5 @@ public class Scm extends SCMListener {
         // TODO Auto-generated method stub
         super.finalize();
     }
-
+*/
 }

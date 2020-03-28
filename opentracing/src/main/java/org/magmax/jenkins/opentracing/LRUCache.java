@@ -66,7 +66,7 @@ public class LRUCache {
 
     private void ensureSize() {
         while (map.size() > max_size) {
-            last.data.finish();
+            //last.data.finish();
             map.remove(last.key);
             last = last.previous;
         }

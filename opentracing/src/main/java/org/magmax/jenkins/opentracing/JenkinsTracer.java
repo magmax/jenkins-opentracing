@@ -1,6 +1,7 @@
 package org.magmax.jenkins.opentracing;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import io.jaegertracing.Configuration;
 import io.jaegertracing.internal.samplers.ConstSampler;
@@ -9,31 +10,22 @@ import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
 
 class JenkinsTracer implements ILRUItem {
-    private Tracer tracer;
+    private List<Tracer> tracers;
     private LinkedList<Span> spanLifo = new LinkedList<>();
 
+    /*
     public JenkinsTracer() {
-        Configuration.SamplerConfiguration samplerConfig = Configuration.SamplerConfiguration.fromEnv()
-                .withType(ConstSampler.TYPE).withParam(1);
-        Configuration.SenderConfiguration senderConfig = Configuration.SenderConfiguration.fromEnv()
-                .withAgentHost("localhost").withAgentPort(5775);
-        Configuration.ReporterConfiguration reporterConfig = Configuration.ReporterConfiguration.fromEnv()
-                .withSender(senderConfig).withLogSpans(true);
-        Configuration config = new Configuration("Jenkins").withSampler(samplerConfig).withReporter(reporterConfig);
-
-        tracer = config.getTracer();
         createSpan("Build");
-    }
-
-    public JenkinsTracer(Tracer tracer) {
-        this.tracer = tracer;
     }
 
     @Override
     public void finish() {
         while (spanLifo.size() > 0)
             closeActiveSpan();
-        tracer.close();
+
+		for (Tracer tracer: tracers) {
+            tracer.close();
+        }
     }
 
     @Override
@@ -54,4 +46,5 @@ class JenkinsTracer implements ILRUItem {
         }
         span.finish();
     }
+    */
 }

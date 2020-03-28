@@ -10,6 +10,7 @@ import io.opentracing.Span;
 
 @Extension(dynamicLoadable = YesNoMaybe.YES)
 public class Queue extends QueueListener {
+    /*
     private Span queueSpan;
 
 
@@ -69,4 +70,5 @@ public class Queue extends QueueListener {
         IdMap idmap = new IdMap(li.getId());
         idmap.closeActiveSpan();
     }
+    */
 }
