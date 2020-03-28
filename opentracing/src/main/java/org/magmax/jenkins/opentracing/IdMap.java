@@ -3,6 +3,7 @@ package org.magmax.jenkins.opentracing;
 import io.opentracing.Span;
 
 public class IdMap {
+    /*
     private String myId;
 
     public IdMap(long id) {
@@ -37,4 +38,5 @@ public class IdMap {
             item.finish();
         }
     }
+    */
 }
